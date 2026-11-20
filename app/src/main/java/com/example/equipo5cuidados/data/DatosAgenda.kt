@@ -28,8 +28,16 @@ object DatosAgenda {
             }
         }
 
+        val medicamentos = DatosMedicamentos.porPersona.flatMap { (personaId, medicamentosPersona) ->
+            medicamentosPersona.filter { it.estaVigente(hoy) }.flatMap { medicamento ->
+                medicamento.programacion.ocurrenciasEn(hoy, medicamento.fechaInicio).map { fechaHora ->
+                    Triple(personaId, medicamento, fechaHora)
+                }
+            }
+        }
+
         // Ordenar las actividades por hora prevista.
-        val ordenadas = actividades.sortedBy { it.third }
+        val ordenadas = (actividades + medicamentos).sortedBy { it.third }
 
         // Crear un evento por cada horario.
         return ordenadas.mapIndexed { indice, actividad ->
@@ -41,8 +49,5 @@ object DatosAgenda {
                 fechaHoraPrevista = actividad.third
             )
         }
-
-        // Pendiente: integrar los medicamentos del área 3
-        // cuando DatosMedicamentos esté disponible en main.
     }
 }

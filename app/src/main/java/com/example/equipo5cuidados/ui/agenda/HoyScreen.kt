@@ -51,6 +51,7 @@ import com.example.equipo5cuidados.model.EstadoEvento
 import com.example.equipo5cuidados.model.EventoAgenda
 import com.example.equipo5cuidados.model.FormatoEntrada
 import com.example.equipo5cuidados.model.Habito
+import com.example.equipo5cuidados.model.HabitoMedicamento
 import com.example.equipo5cuidados.model.HabitoMedicion
 import com.example.equipo5cuidados.model.HabitoRutina
 import com.example.equipo5cuidados.model.HabitoSeguimiento
@@ -174,7 +175,8 @@ fun HoyScreen(modifier: Modifier = Modifier) {
 
             when (actual.habito) {
 
-                is HabitoRutina -> {
+                is HabitoRutina,
+                is HabitoMedicamento -> {
                     registrarEvento(
                         actual,
                         ResultadoRegistro.REALIZADO,
@@ -189,8 +191,6 @@ fun HoyScreen(modifier: Modifier = Modifier) {
                     errorValor = false
                 }
 
-                // Medicamentos: pendiente de integrar Área 3.
-                else -> Unit
             }
         }
     }
