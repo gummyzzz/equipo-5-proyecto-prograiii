@@ -1,6 +1,5 @@
 package com.example.equipo5cuidados.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,35 +8,47 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = AzulCuidadoNoche,
+    secondary = VerdeSalviaNoche,
+    tertiary = AmbarNoche
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = AzulCuidado,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primaryContainer = AzulCuidadoClaro,
+    onPrimaryContainer = AzulCuidadoOscuro,
+    secondary = VerdeSalvia,
+    secondaryContainer = VerdeSalviaClaro,
+    onSecondaryContainer = VerdeSalviaOscuro,
+    tertiary = Ambar,
+    tertiaryContainer = AmbarClaro,
+    error = RojoError,
+    errorContainer = RojoErrorClaro,
+    background = Fondo,
+    surface = Fondo,
+    onBackground = TextoPrincipal,
+    onSurface = TextoPrincipal,
+    onSurfaceVariant = TextoSecundario,
+    surfaceVariant = Superficie5,
+    surfaceContainerLowest = Superficie1,
+    surfaceContainerLow = Superficie2,
+    surfaceContainer = Superficie3,
+    surfaceContainerHigh = Superficie4,
+    surfaceContainerHighest = Superficie5,
+    outline = Borde,
+    outlineVariant = BordeSuave
 )
 
 @Composable
 fun Equipo5cuidadosTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Falso: la app usa SIEMPRE la paleta del equipo, no los colores del fondo del teléfono.
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,7 +56,6 @@ fun Equipo5cuidadosTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
