@@ -1,6 +1,14 @@
-
 package com.example.equipo5cuidados.ui.agenda
 
+
+import android.graphics.Color as AndroidColor
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Color
+import java.time.LocalDateTime
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -238,6 +246,7 @@ private fun EncabezadoFranja(titulo: String) {
     )
 }
 
+
 @Composable
 private fun TarjetaAgendaInicial(
     evento: EventoAgenda
@@ -246,44 +255,128 @@ private fun TarjetaAgendaInicial(
         DateTimeFormatter.ofPattern("HH:mm")
     )
 
-    val nombrePersona = DatosPersonas.buscar(
-        evento.personaId
-    )?.nombre ?: "Persona desconocida"
+    val persona = DatosPersonas.buscar(evento.personaId)
+    val nombrePersona = persona?.nombre ?: "Persona desconocida"
+
+    val colorPerfil = persona?.personaCuidada?.colorPerfil
+        ?: "#9E9E9E"
+
+    val colorIndicador = remember(colorPerfil) {
+        try {
+            Color(AndroidColor.parseColor(colorPerfil))
+        } catch (_: IllegalArgumentException) {
+            Color(0xFF9E9E9E)
+        }
+    }
+
+    val realizada = evento.estado == EstadoEvento.REALIZADO
+    val omitida = evento.estado == EstadoEvento.OMITIDO
+    val pospuesta = evento.estado == EstadoEvento.POSPUESTO
+
+    val atrasada = evento.estaVencido(
+        LocalDateTime.now(),
+        30
+    )
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (atrasada) {
+                MaterialTheme.colorScheme.errorContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
     ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(
-                text = hora,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
                 Text(
-                    text = evento.habito.titulo,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = hora,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                Text(
-                    text = nombrePersona,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            colorIndicador,
+                            CircleShape
+                        )
                 )
+
+                Column {
+                    Text(
+                        text = evento.habito.titulo,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = nombrePersona,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Mostrar el estado correspondiente.
+            when {
+                realizada -> {
+                    val registro = evento.registro
+
+                    if (registro != null) {
+                        val horaReal = registro.fechaHoraReal.format(
+                            DateTimeFormatter.ofPattern("HH:mm")
+                        )
+
+                        val responsable = registro.cuidadorId?.let {
+                            DatosPersonas.buscar(it)?.nombre
+                        } ?: "Sistema"
+
+                        Text(
+                            text = "✓ Hecho a las $horaReal por $responsable",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+
+                omitida -> {
+                    Text(
+                        text = "✗ No se hizo",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                else -> {
+                    if (pospuesta) {
+                        Text(
+                            text = "Pospuesto hasta las $hora",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+
+                    if (atrasada) {
+                        Text(
+                            text = "Atrasado",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
     }
 }
+
