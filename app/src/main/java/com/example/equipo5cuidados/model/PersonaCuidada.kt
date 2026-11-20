@@ -8,12 +8,6 @@ data class PersonaCuidada(
     val contactos: List<ContactoEmergencia>,
     val cuidadoPor: List<Long>
 ) {
-    init {
-        require(personaId !in cuidadoPor) {
-            "Una persona no puede ser cuidadora de sí misma"
-        }
-    }
-
     fun actualizarNotas(notas: String): PersonaCuidada =
         copy(notas = notas)
 
