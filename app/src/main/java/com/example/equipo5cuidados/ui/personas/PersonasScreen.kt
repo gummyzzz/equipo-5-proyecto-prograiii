@@ -1,6 +1,8 @@
 package com.example.equipo5cuidados.ui.personas
 
+import android.content.Intent
 import android.graphics.Color as AndroidColor
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +19,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.equipo5cuidados.data.DatosPersonas
@@ -109,10 +116,12 @@ fun PersonasScreen(modifier: Modifier = Modifier) {
 @Composable
 private fun TarjetaPersonaCuidada(persona: Persona) {
     val cuidado = persona.personaCuidada ?: return
+    val context = LocalContext.current
     val colorAvatar = colorDesdeHex(cuidado.colorPerfil)
     val nombresCuidadores = cuidado.cuidadoPor
         .mapNotNull { idCuidador -> DatosPersonas.buscar(idCuidador)?.nombre }
         .joinToString(", ")
+    val contacto = cuidado.contactoPrincipal()
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -183,6 +192,44 @@ private fun TarjetaPersonaCuidada(persona: Persona) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            if (contacto != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Call,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "${contacto.parentesco}: ${contacto.nombre}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    TextButton(
+                        onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_DIAL,
+                                Uri.parse("tel:${contacto.telefono}")
+                            )
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(text = "Llamar")
+                    }
+                }
             }
         }
     }
