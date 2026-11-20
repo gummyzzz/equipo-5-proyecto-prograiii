@@ -10,23 +10,25 @@ data class HabitoMedicamento(
     override val fechaFin: LocalDate? = null,
     override val activo: Boolean = true,
     override val programacion: Programacion,
-    val dosisTexto: String,
+    val nombre: String,
+    val dosisIndicada: String,
     val cantidadPorToma: Double,
-    val inventario: Inventario,
-    val condiciones: List<CondicionToma> = emptyList(),
-    val colorHex: Long? = null
+    val unidad: String,
+    val colorIdentificacion: String,
+    val inventario: Inventario? = null,
+    val condiciones: List<CondicionToma> = emptyList()
 ) : Habito() {
 
     override fun tipo(): TipoHabito = TipoHabito.MEDICAMENTO
 
-    fun dosisRestantes(): Int = inventario.dosisRestantes(cantidadPorToma)
-
-    fun stockBajo(): Boolean = inventario.estaBajo(cantidadPorToma)
+    fun avisosPrevios(): List<CondicionToma> = condiciones
 
     override fun validar(): List<String> {
         val errores = super.validar().toMutableList()
-        if (dosisTexto.isBlank()) errores.add("La dosis no puede estar vacía")
+        if (nombre.isBlank()) errores.add("El nombre del medicamento no puede estar vacío")
+        if (dosisIndicada.isBlank()) errores.add("La dosis indicada no puede estar vacía")
         if (cantidadPorToma <= 0.0) errores.add("La cantidad por toma debe ser mayor que 0")
+        if (unidad.isBlank()) errores.add("La unidad no puede estar vacía")
         return errores
     }
 }
