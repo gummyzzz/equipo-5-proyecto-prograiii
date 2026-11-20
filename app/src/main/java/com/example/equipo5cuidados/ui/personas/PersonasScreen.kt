@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.equipo5cuidados.data.DatosPersonas
 import com.example.equipo5cuidados.model.Persona
+import com.example.equipo5cuidados.model.RolCuidador
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +52,7 @@ fun PersonasScreen(modifier: Modifier = Modifier) {
     val pestanas = listOf("Personas cuidadas", "Cuidadores")
     val totalPersonas = DatosPersonas.personas.size
     val personasCuidadas = DatosPersonas.personasCuidadas()
+    val cuidadores = DatosPersonas.cuidadores()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -95,15 +97,14 @@ fun PersonasScreen(modifier: Modifier = Modifier) {
                     }
                 }
             } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Cuidadores",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    items(cuidadores, key = { it.id }) { cuidadorPersona ->
+                        TarjetaCuidador(persona = cuidadorPersona)
+                    }
                 }
             }
         }
@@ -217,6 +218,63 @@ private fun TarjetaPersonaCuidada(persona: Persona) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaCuidador(persona: Persona) {
+    val perfilCuidador = persona.cuidador ?: return
+    val colorAvatar = colorDesdeHex(persona.personaCuidada?.colorPerfil ?: "#9E9E9E")
+    val textoRol = when (perfilCuidador.rol) {
+        RolCuidador.ADMINISTRADOR -> "Administrador"
+        RolCuidador.COLABORADOR -> "Colaborador"
+    }
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(colorAvatar),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = persona.iniciales(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = persona.nombre,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Tel. ${persona.telefono}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AssistChip(
+                onClick = {},
+                label = { Text(text = textoRol) }
+            )
         }
     }
 }
