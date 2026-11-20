@@ -1,6 +1,12 @@
 package com.example.equipo5cuidados.ui.agenda
 
 
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import com.example.equipo5cuidados.model.HabitoRutina
+import com.example.equipo5cuidados.model.OrigenRegistro
+import com.example.equipo5cuidados.model.RegistroActividad
+import com.example.equipo5cuidados.model.ResultadoRegistro
 import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -69,6 +75,56 @@ fun HoyScreen(modifier: Modifier = Modifier) {
             addAll(DatosAgenda.generarHoy())
         }
     }
+
+    // Registrar una rutina realizada.
+    val registrarRutina: (EventoAgenda) -> Unit = { evento ->
+
+        val indice = eventos.indexOfFirst {
+            it.id == evento.id
+        }
+
+        if (indice != -1) {
+            val actual = eventos[indice]
+
+            if (
+                actual.registro == null &&
+                actual.habito is HabitoRutina
+            ) {
+                val registro = RegistroActividad(
+                    id = actual.id,
+                    fechaHoraReal = LocalDateTime.now(),
+                    resultado = ResultadoRegistro.REALIZADO,
+                    origen = OrigenRegistro.CUIDADOR,
+                    cuidadorId = 3L,
+                    observacion = "",
+                    avisoPrevioConfirmado = false,
+                    valor = null
+                )
+
+                eventos[indice] = actual.registrar(registro)
+            }
+        }
+    }
+
+    // Posponer una tarea 30 minutos.
+    val posponerEvento: (EventoAgenda) -> Unit = { evento ->
+
+        val indice = eventos.indexOfFirst {
+            it.id == evento.id
+        }
+
+        if (indice != -1) {
+            val actual = eventos[indice]
+
+            if (actual.registro == null) {
+                val nuevaHora = actual.horaVigente()
+                    .plusMinutes(30)
+
+                eventos[indice] = actual.posponer(nuevaHora)
+            }
+        }
+    }
+
 
     var personaSeleccionada by rememberSaveable {
         mutableStateOf<Long?>(null)
@@ -209,7 +265,12 @@ fun HoyScreen(modifier: Modifier = Modifier) {
                     }
 
                     items(manana, key = { it.id }) { evento ->
-                        TarjetaAgendaInicial(evento)
+                        TarjetaAgendaInicial(
+                            evento = evento,
+                            onRealizar = registrarRutina,
+                            onPosponer = posponerEvento
+                        )
+
                     }
                 }
 
@@ -219,7 +280,12 @@ fun HoyScreen(modifier: Modifier = Modifier) {
                     }
 
                     items(tarde, key = { it.id }) { evento ->
-                        TarjetaAgendaInicial(evento)
+                        TarjetaAgendaInicial(
+                            evento = evento,
+                            onRealizar = registrarRutina,
+                            onPosponer = posponerEvento
+                        )
+
                     }
                 }
 
@@ -229,7 +295,12 @@ fun HoyScreen(modifier: Modifier = Modifier) {
                     }
 
                     items(noche, key = { it.id }) { evento ->
-                        TarjetaAgendaInicial(evento)
+                        TarjetaAgendaInicial(
+                            evento = evento,
+                            onRealizar = registrarRutina,
+                            onPosponer = posponerEvento
+                        )
+
                     }
                 }
             }
@@ -246,10 +317,11 @@ private fun EncabezadoFranja(titulo: String) {
     )
 }
 
-
 @Composable
 private fun TarjetaAgendaInicial(
-    evento: EventoAgenda
+    evento: EventoAgenda,
+    onRealizar: (EventoAgenda) -> Unit,
+    onPosponer: (EventoAgenda) -> Unit
 ) {
     val hora = evento.horaVigente().format(
         DateTimeFormatter.ofPattern("HH:mm")
@@ -374,6 +446,31 @@ private fun TarjetaAgendaInicial(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                onRealizar(evento)
+                            },
+                            enabled = evento.habito is HabitoRutina,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Ya lo hice")
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                onPosponer(evento)
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Posponer 30 min")
+                        }
+                    }
+
                 }
             }
         }
