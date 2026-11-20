@@ -31,7 +31,7 @@ object DatosMedicamentos {
 
     val medicamentosIniciales: List<HabitoMedicamento> = listOf(
         HabitoMedicamento(
-            id = 101L,
+            id = 301L,
             titulo = "Losartán 50 mg",
             descripcion = "Control de presión arterial",
             fechaInicio = LocalDate.now().minusDays(10),
@@ -53,7 +53,7 @@ object DatosMedicamentos {
             condiciones = listOf(condicionesEjemplo[2])
         ),
         HabitoMedicamento(
-            id = 102L,
+            id = 302L,
             titulo = "Omeprazol 20 mg",
             descripcion = "Protección gástrica antes del desayuno",
             fechaInicio = LocalDate.now().minusDays(5),
@@ -75,7 +75,7 @@ object DatosMedicamentos {
             condiciones = listOf(condicionesEjemplo[0])
         ),
         HabitoMedicamento(
-            id = 103L,
+            id = 303L,
             titulo = "Vitamina D3 1000 UI",
             descripcion = "Suplemento semanal",
             fechaInicio = LocalDate.now().minusDays(14),
@@ -98,4 +98,17 @@ object DatosMedicamentos {
             condiciones = listOf(condicionesEjemplo[1])
         )
     )
+
+    /**
+     * Mapa de medicamentos asociados al ID de cada persona para que la pantalla Hoy
+     * pueda resolver los medicamentos según la persona activa.
+     */
+    val porPersona: Map<Long, List<HabitoMedicamento>> = mapOf(
+        1L to listOf(medicamentosIniciales[0], medicamentosIniciales[1]),
+        2L to listOf(medicamentosIniciales[2])
+    )
+
+    fun obtenerPorPersona(personaId: Long): List<HabitoMedicamento> {
+        return porPersona[personaId].orEmpty()
+    }
 }
